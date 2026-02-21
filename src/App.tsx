@@ -2,12 +2,12 @@ import "./App.css";
 import { useEffect, useRef } from "react";
 import { render } from "./render/renderer";
 import { createKeyboardInput } from "./input/keyboardInput";
-import type { GameState } from "./game/types";
 import { MessageType } from "./game/enums";
+import { StateInterpolator } from "./game/interpolator";
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const gameStateRef = useRef<GameState | null>(null);
+  const interpolatorRef = useRef<StateInterpolator>(new StateInterpolator());
 
   useEffect(() => {
     const canvas = canvasRef.current!;
@@ -28,12 +28,18 @@ function App() {
 
     // Connect to server
     const socket = new WebSocket("ws://localhost:8080");
-    socket.onopen = () => socket.send(JSON.stringify({ type: MessageType.INIT, dimensions: { width, height } }));
+    socket.onopen = () =>
+      socket.send(
+        JSON.stringify({
+          type: MessageType.INIT,
+          dimensions: { width, height },
+        }),
+      );
 
     socket.onmessage = (msg) => {
       const data = JSON.parse(msg.data);
       if (data.type === MessageType.STATE) {
-        gameStateRef.current = data.state;
+        interpolatorRef.current.addSnapshot(data.state);
       }
     };
 
@@ -41,14 +47,21 @@ function App() {
 
     // Render loop
     function loop() {
-      if (gameStateRef.current) {
-        render(ctx, gameStateRef.current, width, height);
+      const interpolatedState = interpolatorRef.current.getInterpolatedState(
+        performance.now(),
+      );
+
+      if (interpolatedState) {
+        render(ctx, interpolatedState, width, height);
       }
 
       // Send input every frame
       if (socket.readyState === WebSocket.OPEN) {
         socket.send(
-          JSON.stringify({ type: MessageType.INPUT, input: inputController.getInput() }),
+          JSON.stringify({
+            type: MessageType.INPUT,
+            input: inputController.getInput(),
+          }),
         );
       }
 

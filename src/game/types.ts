@@ -12,11 +12,13 @@ export type Player = {
 };
 
 export type Bullet = {
+  id: number;
   x: number;
   y: number;
 };
 
 export type Enemy = {
+  id: number;
   x: number;
   y: number;
   speed: number;
@@ -45,7 +47,7 @@ export type ClientMessage =
         width: number;
         height: number;
       };
-};
+    };
 
 export type ServerMessage = {
   type: MessageType;

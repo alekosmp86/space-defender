@@ -22,11 +22,13 @@ export function render(
 }
 
 function drawPlayer(ctx: CanvasRenderingContext2D, player: Player) {
+  const x = Math.round(player.x);
+  const y = Math.round(player.y);
   ctx.fillStyle = "green";
   ctx.beginPath();
-  ctx.moveTo(player.x, player.y);
-  ctx.lineTo(player.x - 15, player.y + 30);
-  ctx.lineTo(player.x + 15, player.y + 30);
+  ctx.moveTo(x, y);
+  ctx.lineTo(x - 15, y + 30);
+  ctx.lineTo(x + 15, y + 30);
   ctx.closePath();
   ctx.fill();
 }
@@ -34,14 +36,14 @@ function drawPlayer(ctx: CanvasRenderingContext2D, player: Player) {
 function drawBullets(ctx: CanvasRenderingContext2D, bullets: Bullet[]) {
   ctx.fillStyle = "white";
   for (const bullet of bullets) {
-    ctx.fillRect(bullet.x - 3, bullet.y, 6, 12);
+    ctx.fillRect(Math.round(bullet.x) - 3, Math.round(bullet.y), 6, 12);
   }
 }
 
 function drawEnemies(ctx: CanvasRenderingContext2D, enemies: Enemy[]) {
   ctx.fillStyle = "red";
   for (const enemy of enemies) {
-    ctx.fillRect(enemy.x - 15, enemy.y, 30, 30);
+    ctx.fillRect(Math.round(enemy.x) - 15, Math.round(enemy.y), 30, 30);
   }
 }
 
