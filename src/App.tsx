@@ -1,12 +1,13 @@
 import "./App.css";
 import { useEffect, useRef } from "react";
-import { createInitialState, update } from "./game/engine";
-import { TICK_INTERVAL } from "./game/constants";
 import { render } from "./render/renderer";
 import { createKeyboardInput } from "./input/keyboardInput";
+import type { GameState } from "./game/types";
+import { MessageType } from "./game/enums";
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const gameStateRef = useRef<GameState | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current!;
@@ -21,24 +22,40 @@ function App() {
 
     canvas.style.width = width + "px";
     canvas.style.height = height + "px";
-
     ctx.scale(dpr, dpr);
 
-    const state = createInitialState(width, height);
     const inputController = createKeyboardInput();
 
-    const interval = setInterval(() => {
-      update(state, inputController.getInput(), width);
-    }, TICK_INTERVAL);
+    // Connect to server
+    const socket = new WebSocket("ws://localhost:8080");
+    socket.onopen = () => socket.send(JSON.stringify({ type: MessageType.INIT, dimensions: { width, height } }));
 
+    socket.onmessage = (msg) => {
+      const data = JSON.parse(msg.data);
+      if (data.type === MessageType.STATE) {
+        gameStateRef.current = data.state;
+      }
+    };
+
+    socket.onclose = () => console.log("Disconnected from server");
+
+    // Render loop
     function loop() {
-      render(ctx, state, width, height);
+      if (gameStateRef.current) {
+        render(ctx, gameStateRef.current, width, height);
+      }
+
+      // Send input every frame
+      if (socket.readyState === WebSocket.OPEN) {
+        socket.send(
+          JSON.stringify({ type: MessageType.INPUT, input: inputController.getInput() }),
+        );
+      }
+
       requestAnimationFrame(loop);
     }
 
     loop();
-
-    return () => clearInterval(interval);
   }, []);
 
   return (

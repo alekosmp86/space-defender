@@ -1,5 +1,7 @@
+import type { Direction, EnemyPattern, MessageType } from "./enums";
+
 export type InputState = {
-  move: -1 | 0 | 1;
+  move: Direction;
   shoot: boolean;
 };
 
@@ -18,8 +20,8 @@ export type Enemy = {
   x: number;
   y: number;
   speed: number;
-  pattern: "straight" | "zigzag";
-  direction: -1 | 1;
+  pattern: EnemyPattern;
+  direction: Direction;
 };
 
 export type GameState = {
@@ -30,4 +32,22 @@ export type GameState = {
   level: number;
   score: number;
   gameOver: boolean;
+};
+
+export type ClientMessage =
+  | {
+      type: typeof MessageType.INPUT;
+      input: InputState;
+    }
+  | {
+      type: typeof MessageType.INIT;
+      dimensions: {
+        width: number;
+        height: number;
+      };
+};
+
+export type ServerMessage = {
+  type: MessageType;
+  state: GameState;
 };
