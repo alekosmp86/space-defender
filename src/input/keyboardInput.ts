@@ -9,13 +9,16 @@ export function createKeyboardInput() {
   // ----- KEYBOARD -----
   const keys: Record<string, boolean> = {};
 
-  window.addEventListener("keydown", (e) => {
+  const onKeyDown = (e: KeyboardEvent) => {
     keys[e.code] = true;
-  });
+  };
 
-  window.addEventListener("keyup", (e) => {
+  const onKeyUp = (e: KeyboardEvent) => {
     keys[e.code] = false;
-  });
+  };
+
+  window.addEventListener("keydown", onKeyDown);
+  window.addEventListener("keyup", onKeyUp);
 
   function updateKeyboardState() {
     if (keys["ArrowLeft"]) input.move = -1;
@@ -29,6 +32,10 @@ export function createKeyboardInput() {
     getInput: () => {
       updateKeyboardState();
       return input;
+    },
+    destroy: () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
     },
   };
 }

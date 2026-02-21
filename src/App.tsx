@@ -8,6 +8,7 @@ import { StateInterpolator } from "./game/interpolator";
 function App() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const interpolatorRef = useRef<StateInterpolator>(new StateInterpolator());
+  const localPlayerIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current!;
@@ -38,12 +39,16 @@ function App() {
 
     socket.onmessage = (msg) => {
       const data = JSON.parse(msg.data);
-      if (data.type === MessageType.STATE) {
+      if (data.type === MessageType.ASSIGN_ID) {
+        localPlayerIdRef.current = data.id;
+      } else if (data.type === MessageType.STATE) {
         interpolatorRef.current.addSnapshot(data.state);
       }
     };
 
     socket.onclose = () => console.log("Disconnected from server");
+
+    let frameId: number;
 
     // Render loop
     function loop() {
@@ -52,7 +57,13 @@ function App() {
       );
 
       if (interpolatedState) {
-        render(ctx, interpolatedState, width, height);
+        render(
+          ctx,
+          interpolatedState,
+          width,
+          height,
+          localPlayerIdRef.current || undefined,
+        );
       }
 
       // Send input every frame
@@ -65,10 +76,16 @@ function App() {
         );
       }
 
-      requestAnimationFrame(loop);
+      frameId = requestAnimationFrame(loop);
     }
 
     loop();
+
+    return () => {
+      cancelAnimationFrame(frameId);
+      socket.close();
+      inputController.destroy();
+    };
   }, []);
 
   return (

@@ -5,11 +5,14 @@ export function render(
   state: GameState,
   width: number,
   height: number,
+  localPlayerId?: string,
 ) {
   ctx.clearRect(0, 0, width, height);
 
-  // Draw player (triangle)
-  drawPlayer(ctx, state.player);
+  // Draw players (triangles)
+  for (const id in state.players) {
+    drawPlayer(ctx, state.players[id], id === localPlayerId);
+  }
 
   // Draw bullets
   drawBullets(ctx, state.bullets);
@@ -21,10 +24,14 @@ export function render(
   drawScore(ctx, state);
 }
 
-function drawPlayer(ctx: CanvasRenderingContext2D, player: Player) {
+function drawPlayer(
+  ctx: CanvasRenderingContext2D,
+  player: Player,
+  isLocal: boolean,
+) {
   const x = Math.round(player.x);
   const y = Math.round(player.y);
-  ctx.fillStyle = "green";
+  ctx.fillStyle = isLocal ? "green" : "#00FFFF"; // Green for local, Cyan for others
   ctx.beginPath();
   ctx.moveTo(x, y);
   ctx.lineTo(x - 15, y + 30);

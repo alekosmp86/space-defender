@@ -79,9 +79,9 @@ export class StateInterpolator {
 
     return {
       ...s1.state,
-      player: this.interpolatePlayer(
-        s0.state.player,
-        s1.state.player,
+      players: this.interpolatePlayers(
+        s0.state.players,
+        s1.state.players,
         clampedAlpha,
       ),
       bullets: this.interpolateEntities(
@@ -97,12 +97,26 @@ export class StateInterpolator {
     };
   }
 
-  private interpolatePlayer(p0: Player, p1: Player, alpha: number): Player {
-    return {
-      ...p1,
-      x: p0.x + (p1.x - p0.x) * alpha,
-      y: p0.y + (p1.y - p0.y) * alpha,
-    };
+  private interpolatePlayers(
+    p0s: Record<string, Player>,
+    p1s: Record<string, Player>,
+    alpha: number,
+  ): Record<string, Player> {
+    const interpolated: Record<string, Player> = {};
+    for (const id in p1s) {
+      const p1 = p1s[id];
+      const p0 = p0s[id];
+      if (!p0) {
+        interpolated[id] = p1;
+      } else {
+        interpolated[id] = {
+          ...p1,
+          x: p0.x + (p1.x - p0.x) * alpha,
+          y: p0.y + (p1.y - p0.y) * alpha,
+        };
+      }
+    }
+    return interpolated;
   }
 
   private interpolateEntities<T extends { id: number; x: number; y: number }>(
