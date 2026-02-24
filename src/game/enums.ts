@@ -18,3 +18,13 @@ export const Direction = {
   NONE: 0,
 } as const;
 export type Direction = (typeof Direction)[keyof typeof Direction];
+
+export const Colors = {
+  PLAYER: "#00FF00",
+  OTHER_PLAYER: "#00FFFF",
+  PLAYER_BULLET: "#68fc68ff",
+  OTHER_PLAYER_BULLET: "#91f8f8ff",
+  ENEMY: "#FF0000",
+  SCORE: "#FFFF00",
+} as const;
+export type Colors = (typeof Colors)[keyof typeof Colors];

@@ -1,3 +1,4 @@
+import { Colors } from "../game/enums";
 import type { Bullet, Enemy, GameState, Player } from "../game/types";
 
 export function render(
@@ -9,18 +10,13 @@ export function render(
 ) {
   ctx.clearRect(0, 0, width, height);
 
-  // Draw players (triangles)
   for (const id in state.players) {
     drawPlayer(ctx, state.players[id], id === localPlayerId);
   }
+  drawBullets(ctx, state.bullets, localPlayerId);
 
-  // Draw bullets
-  drawBullets(ctx, state.bullets);
-
-  // Draw enemies
   drawEnemies(ctx, state.enemies);
 
-  // Draw score
   drawScore(ctx, state);
 }
 
@@ -31,7 +27,7 @@ function drawPlayer(
 ) {
   const x = Math.round(player.x);
   const y = Math.round(player.y);
-  ctx.fillStyle = isLocal ? "green" : "#00FFFF"; // Green for local, Cyan for others
+  ctx.fillStyle = isLocal ? Colors.PLAYER : Colors.OTHER_PLAYER;
   ctx.beginPath();
   ctx.moveTo(x, y);
   ctx.lineTo(x - 15, y + 30);
@@ -40,22 +36,29 @@ function drawPlayer(
   ctx.fill();
 }
 
-function drawBullets(ctx: CanvasRenderingContext2D, bullets: Bullet[]) {
-  ctx.fillStyle = "white";
+function drawBullets(
+  ctx: CanvasRenderingContext2D,
+  bullets: Bullet[],
+  localPlayerId?: string,
+) {
   for (const bullet of bullets) {
+    ctx.fillStyle =
+      bullet.playerId === localPlayerId
+        ? Colors.PLAYER_BULLET
+        : Colors.OTHER_PLAYER_BULLET;
     ctx.fillRect(Math.round(bullet.x) - 3, Math.round(bullet.y), 6, 12);
   }
 }
 
 function drawEnemies(ctx: CanvasRenderingContext2D, enemies: Enemy[]) {
-  ctx.fillStyle = "red";
+  ctx.fillStyle = Colors.ENEMY;
   for (const enemy of enemies) {
     ctx.fillRect(Math.round(enemy.x) - 15, Math.round(enemy.y), 30, 30);
   }
 }
 
 function drawScore(ctx: CanvasRenderingContext2D, state: GameState) {
-  ctx.fillStyle = "yellow";
+  ctx.fillStyle = Colors.SCORE;
   ctx.font = "20px Arial";
   ctx.fillText(`Score: ${state.score}`, 20, 30);
   ctx.fillText(`Level: ${state.level}`, 20, 60);
