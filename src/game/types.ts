@@ -6,6 +6,7 @@ export type InputState = {
 };
 
 export type Player = {
+  name: string;
   x: number;
   y: number;
   cooldown: number;

@@ -12,6 +12,7 @@ export function render(
 
   for (const id in state.players) {
     drawPlayer(ctx, state.players[id], id === localPlayerId);
+    drawPlayerName(ctx, state.players[id], id === localPlayerId);
   }
   drawBullets(ctx, state.bullets, localPlayerId);
 
@@ -34,6 +35,18 @@ function drawPlayer(
   ctx.lineTo(x + 15, y + 30);
   ctx.closePath();
   ctx.fill();
+}
+
+function drawPlayerName(
+  ctx: CanvasRenderingContext2D,
+  player: Player,
+  isLocal: boolean,
+) {
+  const x = Math.round(player.x);
+  const y = Math.round(player.y);
+  ctx.fillStyle = isLocal ? Colors.PLAYER : Colors.OTHER_PLAYER;
+  ctx.font = "20px Arial";
+  ctx.fillText(player.name, x - 30, y + 50);
 }
 
 function drawBullets(
