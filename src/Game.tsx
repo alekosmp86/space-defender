@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { render } from "./render/renderer";
 import { createKeyboardInput } from "./input/keyboardInput";
 import { MessageType } from "./game/enums";
@@ -12,6 +12,7 @@ export function Game({ playerName }: GameProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const interpolatorRef = useRef<StateInterpolator>(new StateInterpolator());
   const localPlayerIdRef = useRef<string | null>(null);
+  const [isWaiting, setIsWaiting] = useState(true);
 
   useEffect(() => {
     const canvas = canvasRef.current!;
@@ -47,6 +48,7 @@ export function Game({ playerName }: GameProps) {
         localPlayerIdRef.current = data.id;
       } else if (data.type === MessageType.STATE) {
         interpolatorRef.current.addSnapshot(data.state);
+        setIsWaiting(data.state.waiting);
       }
     };
 
@@ -93,13 +95,18 @@ export function Game({ playerName }: GameProps) {
   }, [playerName]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        display: "block",
-        width: "100vw",
-        height: "100vh",
-      }}
-    />
+    <>
+      <canvas
+        ref={canvasRef}
+        style={{
+          display: "block",
+          width: "100vw",
+          height: "100vh",
+        }}
+      />
+      {isWaiting && (
+        <div className='waiting-overlay'>Esperando por otro jugador...</div>
+      )}
+    </>
   );
 }
