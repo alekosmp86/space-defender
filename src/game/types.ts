@@ -45,6 +45,7 @@ export type ClientMessage =
     }
   | {
       type: typeof MessageType.INIT;
+      name: string;
       dimensions: {
         width: number;
         height: number;

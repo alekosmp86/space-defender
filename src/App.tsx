@@ -1,102 +1,25 @@
+import { useState } from "react";
 import "./App.css";
-import { useEffect, useRef } from "react";
-import { render } from "./render/renderer";
-import { createKeyboardInput } from "./input/keyboardInput";
-import { MessageType } from "./game/enums";
-import { StateInterpolator } from "./game/interpolator";
+import { JoinScreen } from "./JoinScreen";
+import { Game } from "./Game";
 
 function App() {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const interpolatorRef = useRef<StateInterpolator>(new StateInterpolator());
-  const localPlayerIdRef = useRef<string | null>(null);
+  const [isJoined, setIsJoined] = useState(false);
+  const [playerName, setPlayerName] = useState("");
 
-  useEffect(() => {
-    const canvas = canvasRef.current!;
-    const ctx = canvas.getContext("2d")!;
-
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-
-    const dpr = window.devicePixelRatio || 1;
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-
-    canvas.style.width = width + "px";
-    canvas.style.height = height + "px";
-    ctx.scale(dpr, dpr);
-
-    const inputController = createKeyboardInput();
-
-    // Connect to server
-    const socket = new WebSocket("ws://localhost:8080");
-    socket.onopen = () =>
-      socket.send(
-        JSON.stringify({
-          type: MessageType.INIT,
-          dimensions: { width, height },
-        }),
-      );
-
-    socket.onmessage = (msg) => {
-      const data = JSON.parse(msg.data);
-      if (data.type === MessageType.ASSIGN_ID) {
-        localPlayerIdRef.current = data.id;
-      } else if (data.type === MessageType.STATE) {
-        interpolatorRef.current.addSnapshot(data.state);
-      }
-    };
-
-    socket.onclose = () => console.log("Disconnected from server");
-
-    let frameId: number;
-
-    // Render loop
-    function loop() {
-      const interpolatedState = interpolatorRef.current.getInterpolatedState(
-        performance.now(),
-      );
-
-      if (interpolatedState) {
-        render(
-          ctx,
-          interpolatedState,
-          width,
-          height,
-          localPlayerIdRef.current || undefined,
-        );
-      }
-
-      // Send input every frame
-      if (socket.readyState === WebSocket.OPEN) {
-        socket.send(
-          JSON.stringify({
-            type: MessageType.INPUT,
-            input: inputController.getInput(),
-          }),
-        );
-      }
-
-      frameId = requestAnimationFrame(loop);
-    }
-
-    loop();
-
-    return () => {
-      cancelAnimationFrame(frameId);
-      socket.close();
-      inputController.destroy();
-    };
-  }, []);
+  const handleJoin = (name: string) => {
+    setPlayerName(name);
+    setIsJoined(true);
+  };
 
   return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        display: "block",
-        width: "100vw",
-        height: "100vh",
-      }}
-    />
+    <div className="app-container">
+      {!isJoined ? (
+        <JoinScreen onJoin={handleJoin} />
+      ) : (
+        <Game playerName={playerName} />
+      )}
+    </div>
   );
 }
 
