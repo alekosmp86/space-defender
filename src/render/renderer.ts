@@ -46,7 +46,9 @@ function drawPlayerName(
   const y = Math.round(player.y);
   ctx.fillStyle = isLocal ? Colors.PLAYER : Colors.OTHER_PLAYER;
   ctx.font = "20px Arial";
-  ctx.fillText(player.name, x - 30, y + 50);
+  ctx.textAlign = "center";
+  ctx.fillText(player.name, x, y + 50);
+  ctx.textAlign = "start";
 }
 
 function drawBullets(
