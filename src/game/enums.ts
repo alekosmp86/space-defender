@@ -19,6 +19,12 @@ export const Direction = {
 } as const;
 export type Direction = (typeof Direction)[keyof typeof Direction];
 
+export const GoalType = {
+  AVOID: "avoid",
+  SCORE: "score",
+} as const;
+export type GoalType = (typeof GoalType)[keyof typeof GoalType];
+
 export const Colors = {
   PLAYER: "#00FF00",
   OTHER_PLAYER: "#00FFFF",

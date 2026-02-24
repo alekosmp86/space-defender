@@ -1,4 +1,4 @@
-import type { Direction, EnemyPattern, MessageType } from "./enums";
+import type { Direction, EnemyPattern, GoalType, MessageType } from "./enums";
 
 export type InputState = {
   move: Direction;
@@ -7,6 +7,10 @@ export type InputState = {
 
 export type LevelRules = {
   canFire: boolean;
+  goal: {
+    type: GoalType;
+    value: number;
+  };
 };
 
 export type Player = {
@@ -42,6 +46,7 @@ export type GameState = {
   gameOver: boolean;
   waiting: boolean;
   rules: LevelRules;
+  goalProgress: number;
 };
 
 export type ClientMessage =
